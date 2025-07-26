@@ -18,7 +18,6 @@ router.get('/google', passport.authenticate('google', { scope: ['profile', 'emai
 router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/login', session: true }),
   (req, res) => {
-    console.log('OAuth callback user:', req.user);
     res.redirect('http://localhost:5173/profile');
   }
 );

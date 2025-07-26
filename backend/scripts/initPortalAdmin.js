@@ -9,15 +9,13 @@ dotenv.config();
 const initializePortalAdmin = async () => {
   try {
     // Connect to MongoDB
-    await mongoose.connect(process.env.MONGO_URL);
-    console.log('Connected to MongoDB');
+      await mongoose.connect(process.env.MONGO_URL);
 
     // Check if portal admin already exists
     const existingAdmin = await PortalAdmin.findOne();
-    if (existingAdmin) {
-      console.log('Portal admin already exists:', existingAdmin.email);
-      process.exit(0);
-    }
+      if (existingAdmin) {
+    process.exit(0);
+  }
 
     // Default portal admin credentials
     const defaultAdmin = {
@@ -37,10 +35,7 @@ const initializePortalAdmin = async () => {
       password: hashedPassword
     });
 
-    console.log('Portal admin initialized successfully!');
-    console.log('Email:', portalAdmin.email);
-    console.log('Password:', defaultAdmin.password);
-    console.log('\n⚠️  IMPORTANT: Change these credentials after first login!');
+    
 
     process.exit(0);
   } catch (error) {

@@ -329,23 +329,12 @@ const PostJob = () => {
 
   // Prefill company fields for admin users from user.company
   useEffect(() => {
-    console.log('PostJob useEffect - user:', user);
-    console.log('PostJob useEffect - user.role:', user?.role);
-    console.log('PostJob useEffect - user.company:', user?.company);
-    console.log('PostJob useEffect - typeof user.company:', typeof user?.company);
-    
     if (user && user.role === 'admin' && user.company && typeof user.company === 'object') {
-      console.log('PostJob useEffect - Setting company details:', {
-        name: user.company.name,
-        location: user.company.location
-      });
       setFormData(prev => ({
         ...prev,
         company_name: user.company.name || '',
         job_location: user.company.location || ''
       }));
-    } else {
-      console.log('PostJob useEffect - Conditions not met for company prefill');
     }
   }, [user]);
 
@@ -502,7 +491,6 @@ const PostJob = () => {
         number_of_openings: parseInt(formData.number_of_openings),
         posted_at: new Date().toISOString()
       };
-      console.log('JobData being sent:', jobData);
       
       if (editMode && jobToEdit && jobToEdit._id) {
         await updateJob(jobToEdit._id, jobData);

@@ -19,13 +19,11 @@ const app = express();
 
 // Connect to database
 connectDB();
-console.log(process.env.EMAIL_USER, process.env.EMAIL_PASS);
-console.log('Loaded ADMIN_REGISTRATION_CODE:', process.env.ADMIN_REGISTRATION_CODE);
 
 // Middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.CLIENT_URL, 'https://your-frontend-domain.vercel.app']
+    ? [process.env.CLIENT_URL]
     : 'http://localhost:5173',
   credentials: true
 }));

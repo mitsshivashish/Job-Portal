@@ -273,14 +273,7 @@ const JobDetails = () => {
                       return;
                     }
                   }
-                  // Debug log for application data
-                  console.log('Submitting application:', {
-                    jobId: job._id,
-                    name: applicantName,
-                    email: applicantEmail,
-                    contact: applicantContact,
-                    resumePath
-                  });
+
                   try {
                     const response = await applyForJob(job._id, {
                       name: applicantName,

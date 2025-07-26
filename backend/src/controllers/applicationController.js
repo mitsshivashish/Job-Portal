@@ -19,12 +19,8 @@ export const applyForJob = async (req, res) => {
       return res.status(400).json({ success: false, message: 'You have already applied for this job.' });
     }
 
-    // Debug log before creation
-    console.log('Creating application:', { user: userId, job: jobId, name, email, contact, resumePath });
     // Create Application document (store applicant details if desired)
     const application = await Application.create({ user: userId, job: jobId, name, email, contact, resumePath });
-    // Debug log after creation
-    console.log('Created application:', application);
 
     // Add applicant info to Job's applicants array
     const job = await Job.findById(jobId);
@@ -33,7 +29,6 @@ export const applyForJob = async (req, res) => {
     }
     // Prevent duplicate in job's applicants array (by email)
     const alreadyInApplicants = job.applicants.some(app => app.email === email);
-    console.log('alreadyInApplicants:', alreadyInApplicants);
     if (!alreadyInApplicants) {
       job.applicants.push({
         applicant_id: job.applicants.length + 1,
@@ -49,7 +44,6 @@ export const applyForJob = async (req, res) => {
       }
       await job.save();
     }
-    console.log('Job applicants after save:', job.applicants);
 
     res.status(201).json({ success: true, data: application, job });
   } catch (error) {

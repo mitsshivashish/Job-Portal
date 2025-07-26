@@ -98,7 +98,7 @@
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/easily-job-portal.git
+git clone https://github.com/mitsshivashish/Job-Portal.git
 cd easily-job-portal
 ```
 
@@ -312,15 +312,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **Email**: your-email@example.com
-- **Issues**: [GitHub Issues](https://github.com/yourusername/easily-job-portal/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/easily-job-portal/discussions)
+- **Email**: Shivashishtiwari18@gmail.com
+- **Issues**: [GitHub Issues](https://github.com/mitsshivashish/Job-Portal/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/mitsshivashish/Job-Portal/discussions)
 
 ---
 
 <div align="center">
 
-**Made with ❤️ by [Your Name]**
+**Made with ❤️ by Shivashish Tiwari**
 
 [![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/yourusername)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/yourusername)

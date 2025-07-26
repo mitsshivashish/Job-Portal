@@ -179,8 +179,7 @@ const CompanyRegister = () => {
         return;
       }
 
-      console.log('Sending request with token:', portalAdminToken);
-      console.log('Request data:', formData);
+      
       
       const response = await axios.post('http://localhost:5000/api/companies/register', formData, {
         headers: {

@@ -11,8 +11,7 @@ export const registerCompany = async (req, res) => {
       });
     }
 
-    console.log('Portal admin authenticated:', req.portalAdmin.email);
-    console.log('Request body:', req.body);
+
 
     const { name, location, description, website, email, phone } = req.body;
 
@@ -26,15 +25,6 @@ export const registerCompany = async (req, res) => {
     }
 
     // Create company (admin code will be auto-generated)
-    console.log('Creating company with data:', {
-      name,
-      location,
-      description,
-      website,
-      email,
-      phone,
-      registeredBy: req.portalAdmin.portalAdminId
-    });
 
     // Generate admin code manually if needed
     let adminCode = null;
@@ -65,7 +55,7 @@ export const registerCompany = async (req, res) => {
       registeredBy: req.portalAdmin.portalAdminId
     });
 
-    console.log('Company created successfully:', company._id);
+
 
     res.status(201).json({
       success: true,

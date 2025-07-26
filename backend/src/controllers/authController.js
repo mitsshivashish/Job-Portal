@@ -7,15 +7,12 @@ import crypto from 'crypto';
 
 // Register user
 export const register = async (req, res) => {
-  console.log('Register endpoint hit');
   try {
-    console.log('Request body:', req.body);
     const { name, email, password, role, phone, adminCode } = req.body;
 
     // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
-      console.log('User already exists:', email);
       return res.status(400).json({ 
         success: false, 
         message: 'User with this email already exists' 
@@ -25,12 +22,10 @@ export const register = async (req, res) => {
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    console.log('Password hashed');
 
     // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 min expiry
-    console.log('OTP generated:', otp);
 
     // Determine role based on adminCode (company-based)
     let userRole = 'user';
@@ -42,11 +37,8 @@ export const register = async (req, res) => {
       if (company) {
         userRole = 'admin';
         companyId = company._id;
-        console.log('Admin registration with company:', company.name);
       } else {
         // Fallback to old system for backward compatibility
-        console.log('adminCode from request:', adminCode, typeof adminCode);
-        console.log('ADMIN_REGISTRATION_CODE from env:', process.env.ADMIN_REGISTRATION_CODE, typeof process.env.ADMIN_REGISTRATION_CODE);
         if (adminCode === process.env.ADMIN_REGISTRATION_CODE) {
           userRole = 'admin';
         }
@@ -65,7 +57,6 @@ export const register = async (req, res) => {
       isVerified: false,
       company: companyId
     });
-    console.log('User created:', user.email);
 
     // Send OTP via email
     try {
@@ -75,7 +66,6 @@ export const register = async (req, res) => {
         `Your OTP is: ${otp}`,
         `<p>Your OTP is: <b>${otp}</b></p>`
       );
-      console.log('OTP email sent to:', email);
     } catch (emailErr) {
       console.error('Error sending OTP email:', emailErr);
       return res.status(500).json({ success: false, message: 'Failed to send OTP email', error: emailErr.message });
@@ -210,7 +200,6 @@ export const getMe = async (req, res) => {
       return res.status(401).json({ success: false, message: 'Not authenticated' });
     }
     const user = await User.findById(req.user.userId).select('-password').populate('company');
-    console.log('getMe found user:', user);
     res.json({
       success: true,
       data: {
@@ -433,20 +422,16 @@ export const getSkills = async (req, res) => {
 
 export const updateSkills = async (req, res) => {
   try {
-    console.log('updateSkills called. Body:', req.body);
     const { skills } = req.body;
     if (!Array.isArray(skills)) {
-      console.log('Invalid skills format:', skills);
       return res.status(400).json({ success: false, message: 'Skills must be an array of strings' });
     }
     const user = await User.findById(req.user.userId);
     if (!user) {
-      console.log('User not found for ID:', req.user.userId);
       return res.status(404).json({ success: false, message: 'User not found' });
     }
     user.skills = skills;
     await user.save();
-    console.log('Skills updated for user:', user.email, user.skills);
     res.json({ success: true, skills: user.skills });
   } catch (error) {
     console.error('Error in updateSkills:', error);

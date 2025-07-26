@@ -268,7 +268,6 @@ const EmptyDesc = styled.p`
 `;
 
 const Applicants = () => {
-  console.log('Applicants page mounted');
   const { id } = useParams();
   const [applicants, setApplicants] = useState([]);
   const [job, setJob] = useState(null);
@@ -278,7 +277,6 @@ const Applicants = () => {
   const loadApplicants = useCallback(async () => {
     try {
       setLoading(true);
-      console.log('Fetching applicants for job:', id);
       const [applicantsResponse, jobResponse] = await Promise.all([
         fetchJobApplicants(id),
         fetchJob(id)
@@ -295,7 +293,6 @@ const Applicants = () => {
   }, [id]);
 
   useEffect(() => {
-    console.log('Applicants useEffect triggered');
     loadApplicants();
   }, [loadApplicants]);
 
@@ -309,8 +306,7 @@ const Applicants = () => {
     );
   }
 
-  // Debug log for applicants array
-  console.log('Applicants to render:', applicants);
+
 
   return (
     <PageWrapper>
