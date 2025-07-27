@@ -58,7 +58,7 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
       return;
     }
-    axios.get('http://localhost:5000/api/auth/me', { withCredentials: true })
+            axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/me`, { withCredentials: true })
         .then(response => {
           setUser(response.data.data);
         })
@@ -85,7 +85,7 @@ export const AuthProvider = ({ children }) => {
       const res = await updateProfile({ adminCode: code });
       if (res.data.success) {
         // Optionally, update role to admin if backend does so
-        const refreshed = await axios.get('http://localhost:5000/api/auth/me', { withCredentials: true });
+        const refreshed = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/me`, { withCredentials: true });
         setUser(refreshed.data.data);
         setShowAdminModal(false);
         window.location.reload();

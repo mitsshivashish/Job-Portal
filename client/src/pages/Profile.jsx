@@ -105,7 +105,7 @@ const Profile = () => {
     const fetchCompanyInfo = async () => {
       if (user && user.role === 'admin' && user.company) {
         try {
-          const response = await fetch(`http://localhost:5000/api/companies/${user.company}`, {
+          const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/companies/${user.company}`, {
             credentials: 'include'
           });
           if (response.ok) {

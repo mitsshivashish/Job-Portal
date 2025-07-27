@@ -79,7 +79,7 @@ const PortalCompanies = () => {
 
   useEffect(() => {
     if (!token) return;
-    axios.get('http://localhost:5000/api/companies/portal', {
+          axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/companies/portal`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => setCompanies(res.data.data))
@@ -94,13 +94,13 @@ const PortalCompanies = () => {
   const handleSave = async () => {
     setLoading(true);
     try {
-      await axios.put(`http://localhost:5000/api/companies/${editing}`, form, {
+              await axios.put(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/companies/${editing}`, form, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('Company updated');
       setEditing(null);
       // Refresh list
-      const res = await axios.get('http://localhost:5000/api/companies/portal', {
+              const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/companies/portal`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCompanies(res.data.data);

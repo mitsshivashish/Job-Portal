@@ -260,7 +260,7 @@ const JobDetails = () => {
                     const formData = new FormData();
                     formData.append('file', uploadedFile);
                     try {
-                      const res = await fetch('http://localhost:5000/api/applications/upload', {
+                      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/applications/upload`, {
                         method: 'POST',
                         body: formData,
                         credentials: 'include'

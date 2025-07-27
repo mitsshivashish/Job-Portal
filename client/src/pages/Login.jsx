@@ -180,7 +180,7 @@ const Login = () => {
           <div className="flex flex-col items-center mt-6">
             <button
               type="button"
-              onClick={() => window.location.href = 'http://localhost:5000/api/auth/google'}
+              onClick={() => window.location.href = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/google`}
               className="w-full py-3 px-4 rounded-full font-bold bg-white border-2 border-blue-500 text-blue-700 shadow hover:bg-blue-50 transition-all duration-300 text-base sm:text-lg flex items-center justify-center gap-2"
               style={{ marginTop: 8 }}
             >

@@ -82,7 +82,7 @@ const Register = () => {
     if (code.length === 14) {
       setCheckingCode(true);
       try {
-        const response = await axios.get(`http://localhost:5000/api/companies/admin-code/${code}`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/companies/admin-code/${code}`);
         if (response.data.success) {
           setCompanyDetails(response.data.data);
         }
