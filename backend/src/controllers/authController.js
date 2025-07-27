@@ -206,16 +206,21 @@ export const login = async (req, res) => {
 export const getMe = async (req, res) => {
   try {
     console.log('getMe req.user:', req.user);
+    console.log('getMe req.session:', req.session ? 'Session exists' : 'No session');
+    console.log('getMe req.sessionID:', req.sessionID);
     
     // Handle both session-based (Passport) and JWT authentication
     let userId;
     if (req.user && req.user.userId) {
       // JWT authentication
       userId = req.user.userId;
+      console.log('Using JWT userId:', userId);
     } else if (req.user && req.user._id) {
       // Session-based authentication (Passport)
       userId = req.user._id;
+      console.log('Using session userId:', userId);
     } else {
+      console.log('No user found in request');
       return res.status(401).json({ success: false, message: 'Not authenticated' });
     }
     

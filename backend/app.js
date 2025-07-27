@@ -10,6 +10,7 @@ import companyRoutes from './src/routes/company.js';
 import portalAdminRoutes from './src/routes/portalAdmin.js';
 import path from 'path';
 import session from 'express-session';
+import MongoStore from 'connect-mongo';
 import passport from 'passport';
 import './src/config/passport.js';
 
@@ -23,9 +24,11 @@ connectDB();
 // Middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.CLIENT_URL]
+    ? [process.env.CLIENT_URL, 'https://job-portal-one-orcin.vercel.app']
     : 'http://localhost:5173',
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -35,10 +38,14 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'your-session-secret',
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URL,
+    collectionName: 'sessions'
+  }),
   cookie: { 
     secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
     httpOnly: true,
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    sameSite: 'lax', // Changed from 'none' to 'lax' for better compatibility
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
@@ -60,6 +67,21 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 // Health check route
 app.get('/api/health', (req, res) => {
   res.json({ message: 'Server is running' });
+});
+
+// Session test route
+app.get('/api/session-test', (req, res) => {
+  console.log('Session test - req.session:', req.session ? 'Session exists' : 'No session');
+  console.log('Session test - req.user:', req.user ? 'User exists' : 'No user');
+  console.log('Session test - req.sessionID:', req.sessionID);
+  
+  res.json({ 
+    message: 'Session test',
+    hasSession: !!req.session,
+    hasUser: !!req.user,
+    sessionID: req.sessionID,
+    user: req.user
+  });
 });
 
 // Error handling middleware
