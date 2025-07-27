@@ -6,6 +6,7 @@ const authMiddleware = async (req, res, next) => {
   console.log('Auth middleware - req.user:', req.user);
   console.log('Auth middleware - req.sessionID:', req.sessionID);
   console.log('Auth middleware - req.session.passport:', req.session?.passport);
+  console.log('Auth middleware - Full session object:', JSON.stringify(req.session, null, 2));
   
   // Support Passport session-based authentication
   if (req.user) {
