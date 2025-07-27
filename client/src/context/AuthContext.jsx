@@ -62,23 +62,15 @@ export const AuthProvider = ({ children }) => {
     // Check for session-based authentication
     const checkSession = async () => {
       try {
-        console.log('Checking session...');
         const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/me`, { 
           withCredentials: true 
         });
-        console.log('Session check response:', response.data);
         if (response.data.success) {
           setUser(response.data.data);
-          console.log('User set:', response.data.data);
         } else {
           setUser(null);
-          console.log('No user data in response');
         }
       } catch (error) {
-        console.log('Session check failed:', error.response?.status, error.response?.data);
-        console.log('Error details:', error.message);
-        console.log('Request URL:', `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/me`);
-        console.log('With credentials:', true);
         setUser(null);
       } finally {
         setLoading(false);

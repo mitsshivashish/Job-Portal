@@ -36,16 +36,18 @@ app.use(express.urlencoded({ extended: true }));
 // Session middleware (required for Passport OAuth)
 app.use(session({
   secret: process.env.SESSION_SECRET || 'your-session-secret',
-  resave: false,
-  saveUninitialized: false,
+  resave: true, // Changed to true to ensure session is saved
+  saveUninitialized: true, // Changed to true to save uninitialized sessions
   store: MongoStore.create({
     mongoUrl: process.env.MONGO_URL,
-    collectionName: 'sessions'
+    collectionName: 'sessions',
+    ttl: 24 * 60 * 60, // 24 hours in seconds
+    autoRemove: 'native' // Use MongoDB's TTL index
   }),
   cookie: { 
     secure: process.env.NODE_ENV === 'production', // true in production (HTTPS)
     httpOnly: true,
-    sameSite: 'lax', // Changed from 'none' to 'lax' for better compatibility
+    sameSite: 'lax',
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));

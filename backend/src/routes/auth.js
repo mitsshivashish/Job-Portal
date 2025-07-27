@@ -18,23 +18,14 @@ router.get('/google', passport.authenticate('google', { scope: ['profile', 'emai
 router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/login', session: true }),
   (req, res) => {
-    console.log('OAuth callback - User:', req.user ? req.user.email : 'No user');
-    console.log('OAuth callback - Session:', req.session ? 'Session exists' : 'No session');
-    console.log('OAuth callback - Session passport:', req.session?.passport);
-    console.log('OAuth callback - Full session:', JSON.stringify(req.session, null, 2));
-    
     const redirectUrl = process.env.NODE_ENV === 'production' 
       ? `${process.env.CLIENT_URL}/profile`
       : 'http://localhost:5173/profile';
     
-    console.log('Redirecting to:', redirectUrl);
-    
-    // Force session save before redirect
+    // Ensure session is saved before redirect
     req.session.save((err) => {
       if (err) {
-        console.log('Session save error:', err);
-      } else {
-        console.log('Session saved successfully');
+        console.error('Session save error:', err);
       }
       res.redirect(redirectUrl);
     });
