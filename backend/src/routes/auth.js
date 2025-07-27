@@ -18,7 +18,10 @@ router.get('/google', passport.authenticate('google', { scope: ['profile', 'emai
 router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/login', session: true }),
   (req, res) => {
-    res.redirect('http://localhost:5173/profile');
+    const redirectUrl = process.env.NODE_ENV === 'production' 
+      ? `${process.env.CLIENT_URL}/profile`
+      : 'http://localhost:5173/profile';
+    res.redirect(redirectUrl);
   }
 );
 
