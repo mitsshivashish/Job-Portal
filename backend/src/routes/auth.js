@@ -1,4 +1,5 @@
 import express from 'express';
+import jwt from 'jsonwebtoken';
 import { register, login, getMe, getAllUsers, updateProfile, updateRole, verifyOtp, forgotPassword, resetPassword, getSkills, updateSkills } from '../controllers/authController.js';
 import authMiddleware from '../middlewares/authMiddleware.js';
 import passport from '../config/passport.js';
@@ -18,17 +19,18 @@ router.get('/google', passport.authenticate('google', { scope: ['profile', 'emai
 router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/login', session: true }),
   (req, res) => {
-    const redirectUrl = process.env.NODE_ENV === 'production' 
-      ? `${process.env.CLIENT_URL}/profile`
-      : 'http://localhost:5173/profile';
+    // Generate JWT token for the authenticated user
+    const token = jwt.sign(
+      { userId: req.user._id, email: req.user.email, role: req.user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
     
-    // Ensure session is saved before redirect
-    req.session.save((err) => {
-      if (err) {
-        console.error('Session save error:', err);
-      }
-      res.redirect(redirectUrl);
-    });
+    const redirectUrl = process.env.NODE_ENV === 'production' 
+      ? `${process.env.CLIENT_URL}/profile?token=${token}`
+      : `http://localhost:5173/profile?token=${token}`;
+    
+    res.redirect(redirectUrl);
   }
 );
 

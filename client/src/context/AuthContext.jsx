@@ -59,25 +59,67 @@ export const AuthProvider = ({ children }) => {
       return;
     }
 
-    // Check for session-based authentication
-    const checkSession = async () => {
-      try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/me`, { 
-          withCredentials: true 
-        });
-        if (response.data.success) {
-          setUser(response.data.data);
-        } else {
-          setUser(null);
+    // Check for OAuth token in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const oauthToken = urlParams.get('token');
+    
+    if (oauthToken) {
+      // Store the token and remove from URL
+      localStorage.setItem('token', oauthToken);
+      setToken(oauthToken);
+      
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      // Fetch user data with the token
+      const fetchUserData = async () => {
+        try {
+          const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/me`, {
+            headers: { Authorization: `Bearer ${oauthToken}` }
+          });
+          if (response.data.success) {
+            setUser(response.data.data);
+          }
+        } catch (error) {
+          console.error('Failed to fetch user data:', error);
+        } finally {
+          setLoading(false);
         }
-      } catch (error) {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
+      };
+      
+      fetchUserData();
+      return;
+    }
 
-    checkSession();
+    // Check for existing JWT token
+    const existingToken = localStorage.getItem('token');
+    if (existingToken) {
+      setToken(existingToken);
+      const fetchUserData = async () => {
+        try {
+          const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/me`, {
+            headers: { Authorization: `Bearer ${existingToken}` }
+          });
+          if (response.data.success) {
+            setUser(response.data.data);
+          } else {
+            localStorage.removeItem('token');
+            setToken(null);
+          }
+        } catch (error) {
+          localStorage.removeItem('token');
+          setToken(null);
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      fetchUserData();
+      return;
+    }
+
+    // No token found, user is not authenticated
+    setLoading(false);
   }, []);
 
   useEffect(() => {
