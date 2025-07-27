@@ -3,6 +3,16 @@ import Job from "../models/Jobs.js";
 import Application from '../models/application.js';
 import User from '../models/users.js';
 
+// Helper function to extract userId from req.user (handles both JWT and session auth)
+const getUserId = (req) => {
+  if (req.user && req.user.userId) {
+    return req.user.userId; // JWT authentication
+  } else if (req.user && req.user._id) {
+    return req.user._id; // Session-based authentication (Passport)
+  }
+  return null;
+};
+
 // Get all jobs
 export const getAllJobs = async (req, res) => {
   try {
@@ -94,6 +104,11 @@ export const createJob = async (req, res) => {
       applyByDate.setHours(23, 59, 59, 999);
     }
 
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Not authenticated' });
+    }
+
     const job = await Job.create({
       job_category,
       job_type,
@@ -106,7 +121,7 @@ export const createJob = async (req, res) => {
       number_of_openings,
       description,
       company_logo,
-      posted_by: req.user.userId
+      posted_by: userId
     });
 
     const populatedJob = await Job.findById(job._id)
@@ -137,8 +152,13 @@ export const updateJob = async (req, res) => {
       });
     }
 
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Not authenticated' });
+    }
+
     // Check if user owns the job or is admin
-    if (job.posted_by.toString() !== req.user.userId && req.user.role !== 'admin') {
+    if (job.posted_by.toString() !== userId && req.user.role !== 'admin') {
       return res.status(401).json({ 
         success: false, 
         message: 'Not authorized to update this job' 
@@ -175,8 +195,13 @@ export const deleteJob = async (req, res) => {
       });
     }
 
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Not authenticated' });
+    }
+
     // Check if user owns the job or is admin
-    if (job.posted_by.toString() !== req.user.userId && req.user.role !== 'admin') {
+    if (job.posted_by.toString() !== userId && req.user.role !== 'admin') {
       return res.status(401).json({ 
         success: false, 
         message: 'Not authorized to delete this job' 
@@ -263,8 +288,13 @@ export const getJobApplicants = async (req, res) => {
       });
     }
 
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Not authenticated' });
+    }
+
     // Check if user owns the job or is admin
-    if (job.posted_by._id.toString() !== req.user.userId && req.user.role !== 'admin') {
+    if (job.posted_by._id.toString() !== userId && req.user.role !== 'admin') {
       return res.status(401).json({ 
         success: false, 
         message: 'Not authorized to view applicants' 
@@ -313,7 +343,10 @@ export const getJobsByUser = async (req, res) => {
 // Get jobs posted by the current admin user
 export const getMyPostedJobs = async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Not authenticated' });
+    }
     const jobs = await Job.find({ posted_by: new mongoose.Types.ObjectId(userId) })
       .populate('posted_by', 'name email');
     res.json({ success: true, data: jobs });
@@ -326,9 +359,10 @@ export const getMyPostedJobs = async (req, res) => {
 // Get featured jobs
 export const getFeaturedJobs = async (req, res) => {
   try {
-    if (req.user && req.user.userId) {
+    const userId = getUserId(req);
+    if (userId) {
       // User is logged in, get their skills
-      const user = await User.findById(req.user.userId);
+      const user = await User.findById(userId);
       if (!user || !user.skills || user.skills.length === 0) {
         // If no skills, return latest jobs
         const today = new Date();

@@ -2,9 +2,22 @@ import Application from '../models/application.js';
 import User from '../models/users.js';
 import Job from '../models/Jobs.js';
 
+// Helper function to extract userId from req.user (handles both JWT and session auth)
+const getUserId = (req) => {
+  if (req.user && req.user.userId) {
+    return req.user.userId; // JWT authentication
+  } else if (req.user && req.user._id) {
+    return req.user._id; // Session-based authentication (Passport)
+  }
+  return null;
+};
+
 export const applyForJob = async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Not authenticated' });
+    }
     const { jobId, name, email, contact, resumePath } = req.body;
 
     // Only users (not admins) can apply
@@ -54,7 +67,10 @@ export const applyForJob = async (req, res) => {
 
 export const getUserApplications = async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Not authenticated' });
+    }
     const applications = await Application.find({ user: userId }).populate('job');
     res.json({ success: true, data: applications });
   } catch (error) {

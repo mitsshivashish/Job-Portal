@@ -5,6 +5,16 @@ import jwt from 'jsonwebtoken';
 import sendEmail from '../utils/sendEmail.js';
 import crypto from 'crypto';
 
+// Helper function to extract userId from req.user (handles both JWT and session auth)
+const getUserId = (req) => {
+  if (req.user && req.user.userId) {
+    return req.user.userId; // JWT authentication
+  } else if (req.user && req.user._id) {
+    return req.user._id; // Session-based authentication (Passport)
+  }
+  return null;
+};
+
 // Register user
 export const register = async (req, res) => {
   try {
@@ -196,10 +206,20 @@ export const login = async (req, res) => {
 export const getMe = async (req, res) => {
   try {
     console.log('getMe req.user:', req.user);
-    if (!req.user || !req.user.userId) {
+    
+    // Handle both session-based (Passport) and JWT authentication
+    let userId;
+    if (req.user && req.user.userId) {
+      // JWT authentication
+      userId = req.user.userId;
+    } else if (req.user && req.user._id) {
+      // Session-based authentication (Passport)
+      userId = req.user._id;
+    } else {
       return res.status(401).json({ success: false, message: 'Not authenticated' });
     }
-    const user = await User.findById(req.user.userId).select('-password').populate('company');
+    
+    const user = await User.findById(userId).select('-password').populate('company');
     res.json({
       success: true,
       data: {
@@ -245,7 +265,11 @@ export const getAllUsers = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const { name, email, currentPassword, newPassword } = req.body;
-    const userId = req.user.userId;
+    const userId = getUserId(req);
+    
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Not authenticated' });
+    }
 
     const user = await User.findById(userId);
     if (!user) {
@@ -327,7 +351,11 @@ export const updateProfile = async (req, res) => {
 export const updateRole = async (req, res) => {
   try {
     const { role } = req.body;
-    const userId = req.user.userId;
+    const userId = getUserId(req);
+    
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Not authenticated' });
+    }
 
     const user = await User.findById(userId);
     if (!user) {
@@ -410,7 +438,12 @@ export const resetPassword = async (req, res) => {
 
 export const getSkills = async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId);
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Not authenticated' });
+    }
+    
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
@@ -426,7 +459,12 @@ export const updateSkills = async (req, res) => {
     if (!Array.isArray(skills)) {
       return res.status(400).json({ success: false, message: 'Skills must be an array of strings' });
     }
-    const user = await User.findById(req.user.userId);
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Not authenticated' });
+    }
+    
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
