@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { fetchJobs, fetchFeaturedJobs } from '../api/jobs';
 import { useAuth } from '../context/AuthContext';
 import JobCard from '../components/JobCard';
+import JobCardSkeleton from '../components/loaders/JobCardSkeleton';
 import AnimatedSearchBar from '../components/AnimatedSearchBar';
+import JobsListSkeleton from '../components/loaders/JobsListSkeleton';
 import styled from 'styled-components';
 
 // Shared job categories (should match PostJob.jsx)
@@ -34,6 +36,7 @@ const Jobs = () => {
   const [jobs, setJobs] = useState([]);
   const [featuredJobs, setFeaturedJobs] = useState([]);
   const [featuredLoading, setFeaturedLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const [search, setSearch] = useState('');
   const [jobType, setJobType] = useState('all');
@@ -42,10 +45,18 @@ const Jobs = () => {
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
-    fetchJobs().then(res => setJobs(res.data.data));
-    fetchFeaturedJobs().then(res => {
-      setFeaturedJobs(res.data.data);
+    setLoading(true);
+    Promise.all([
+      fetchJobs(),
+      fetchFeaturedJobs()
+    ]).then(([jobsRes, featuredRes]) => {
+      setJobs(jobsRes.data.data);
+      setFeaturedJobs(featuredRes.data.data);
       setFeaturedLoading(false);
+    }).catch(err => {
+      console.error('Failed to fetch jobs:', err);
+    }).finally(() => {
+      setLoading(false);
     });
   }, []);
 
@@ -309,7 +320,14 @@ const Jobs = () => {
         <main className="flex-1 order-2 md:order-2">
           <h2 className="jobs-heading mb-8 animate-shine-underline">Available Jobs</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-            {filteredJobs.length === 0 ? (
+            {loading ? (
+              // Show skeleton loading
+              [...Array(6)].map((_, idx) => (
+                <div key={idx} className="animate-jobcard-fade" style={{animationDelay: `${0.12 + idx * 0.08}s`}}>
+                  <JobCardSkeleton />
+                </div>
+              ))
+            ) : filteredJobs.length === 0 ? (
               <p className="col-span-3 text-center text-gray-500">No jobs found.</p>
             ) : (
               filteredJobs.map((job, idx) => (

@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { fetchJobs, fetchFeaturedJobs, fetchRecommendedJobs } from '../api/jobs';
 import JobCard from '../components/JobCard';
+import JobCardSkeleton from '../components/loaders/JobCardSkeleton';
 import AnimatedSearchBar from '../components/AnimatedSearchBar';
+import SearchBarSkeleton from '../components/loaders/SearchBarSkeleton';
 
 const features = [
   {
@@ -41,16 +43,27 @@ const Home = () => {
   const [filtered, setFiltered] = useState([]);
   const [search, setSearch] = useState('');
   const [featuredJobs, setFeaturedJobs] = useState([]);
+  const [recommendedJobs, setRecommendedJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchJobs().then(res => {
-      setJobs(res.data.data);
-      setFiltered(res.data.data.slice(0, 6));
+    setLoading(true);
+    
+    Promise.all([
+      fetchJobs(),
+      fetchFeaturedJobs(),
+      isAuthenticated && user ? fetchRecommendedJobs() : Promise.resolve({ data: { data: [] } })
+    ]).then(([jobsRes, featuredRes, recommendedRes]) => {
+      setJobs(jobsRes.data.data);
+      setFiltered(jobsRes.data.data.slice(0, 6));
+      setFeaturedJobs(featuredRes.data.data || []);
+      setRecommendedJobs(recommendedRes?.data?.data || []);
+    }).catch(err => {
+      console.error('Failed to fetch jobs:', err);
+    }).finally(() => {
+      setLoading(false);
     });
-      fetchFeaturedJobs().then(res => {
-        setFeaturedJobs(res.data.data || []);
-      });
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user]);
 
   useEffect(() => {
     if (!search.trim()) {
@@ -76,7 +89,11 @@ const Home = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Animated Search Bar at the very top for full animation visibility */}
       <div style={{ position: 'relative', zIndex: 1, marginTop: '2rem', marginBottom: '2rem' }}>
-        <AnimatedSearchBar value={search} onChange={e => setSearch(e.target.value)} />
+        {loading ? (
+          <SearchBarSkeleton />
+        ) : (
+          <AnimatedSearchBar value={search} onChange={e => setSearch(e.target.value)} />
+        )}
       </div>
       {/* Hero Section - only show when not searching */}
       {(!search.trim()) && (
@@ -101,13 +118,25 @@ const Home = () => {
           </div>
         </section>
       )}
-      {/* Featured/Search Results Section */}
+      {/* Featured/Recommended/Search Results Section */}
       <section className="mt-8 sm:mt-12">
         <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center px-4">
-          {search.trim() ? 'Searched Jobs' : 'Featured Jobs'}
+          {search.trim() 
+            ? 'Searched Jobs' 
+            : isAuthenticated && user 
+              ? 'Recommended Jobs for You'
+              : 'Featured Jobs'
+          }
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-          {search.trim()
+          {loading ? (
+            // Show skeleton loading
+            [...Array(6)].map((_, idx) => (
+              <div key={idx} style={{ animation: `fadeInUp 0.5s ${idx * 0.1 + 0.2}s both` }}>
+                <JobCardSkeleton />
+              </div>
+            ))
+          ) : search.trim()
             ? (
               filtered.length === 0
                 ? <p className="col-span-full text-center text-gray-500 px-4">No jobs found for your search.</p>
@@ -117,15 +146,25 @@ const Home = () => {
                     </div>
                   ))
             )
-            : (
-              featuredJobs.length === 0
-                ? <p className="col-span-full text-center text-gray-500 px-4">No featured jobs found.</p>
-                : featuredJobs.map((job, idx) => (
-              <div key={job._id} style={{ animation: `fadeInUp 0.5s ${idx * 0.1 + 0.2}s both` }}>
-                <JobCard job={job} />
-              </div>
-            ))
-            )
+            : isAuthenticated && user
+              ? (
+                recommendedJobs.length === 0
+                  ? <p className="col-span-full text-center text-gray-500 px-4">No recommended jobs found. Add skills to your profile to get personalized recommendations!</p>
+                  : recommendedJobs.map((job, idx) => (
+                      <div key={job._id} style={{ animation: `fadeInUp 0.5s ${idx * 0.1 + 0.2}s both` }}>
+                        <JobCard job={job} />
+                      </div>
+                    ))
+              )
+              : (
+                featuredJobs.length === 0
+                  ? <p className="col-span-full text-center text-gray-500 px-4">No featured jobs found.</p>
+                  : featuredJobs.map((job, idx) => (
+                      <div key={job._id} style={{ animation: `fadeInUp 0.5s ${idx * 0.1 + 0.2}s both` }}>
+                        <JobCard job={job} />
+                      </div>
+                    ))
+              )
           }
         </div>
       </section>

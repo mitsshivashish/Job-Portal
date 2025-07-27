@@ -4,10 +4,11 @@ import { useAuth } from '../context/AuthContext.jsx';
 import Lottie from 'lottie-react';
 import profileLottie from '../assets/Animation - 1751910490425.json';
 import ConfirmModal from './ConfirmModal.jsx';
+import NavbarSkeleton from './loaders/NavbarSkeleton';
 import { FaBars, FaTimes } from 'react-icons/fa';
 
 const Navbar = () => {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -58,6 +59,10 @@ const Navbar = () => {
       navigate('/post-job');
     }
   };
+
+  if (loading) {
+    return <NavbarSkeleton />;
+  }
 
   return (
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-lg border-b border-gray-200">

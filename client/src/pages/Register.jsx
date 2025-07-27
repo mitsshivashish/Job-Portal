@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import AuthFormSkeleton from '../components/loaders/AuthFormSkeleton';
 import axios from 'axios';
 
 const TYPING_SPEED = 40;
@@ -56,6 +57,7 @@ const Register = () => {
   const [checkingCode, setCheckingCode] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
   const [showOtpInput, setShowOtpInput] = useState(false);
   const [otp, setOtp] = useState('');
   const [otpError, setOtpError] = useState('');
@@ -63,6 +65,14 @@ const Register = () => {
   const [registeredEmail, setRegisteredEmail] = useState('');
   const { register } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Simulate page loading
+    const timer = setTimeout(() => {
+      setPageLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -181,6 +191,10 @@ const Register = () => {
       setOtpError(error.response?.data?.message || 'OTP verification failed.');
     }
   };
+
+  if (pageLoading) {
+    return <AuthFormSkeleton />;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-gray-100 relative overflow-hidden px-4">

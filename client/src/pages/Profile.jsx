@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { getSkills, saveSkills, updateProfile } from '../api/auth';
+import ProfileSkeleton from '../components/loaders/ProfileSkeleton';
 
 const SkillsSection = () => {
   const [skills, setSkills] = useState([]);
@@ -147,7 +148,7 @@ const Profile = () => {
   };
 
   if (!user) {
-    return <div className="flex justify-center items-center h-64">Loading...</div>;
+    return <ProfileSkeleton />;
   }
 
   // Get first initial

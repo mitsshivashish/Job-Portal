@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import AuthFormSkeleton from '../components/loaders/AuthFormSkeleton';
 
 const TYPING_SPEED = 40;
 
@@ -49,9 +50,18 @@ const Login = () => {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
   
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Simulate page loading
+    const timer = setTimeout(() => {
+      setPageLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -105,6 +115,10 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+  if (pageLoading) {
+    return <AuthFormSkeleton />;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-white to-blue-200 relative overflow-hidden px-4">

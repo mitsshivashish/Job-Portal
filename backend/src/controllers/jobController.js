@@ -469,7 +469,12 @@ export const getFeaturedJobs = async (req, res) => {
 // Get recommended jobs for the current user
 export const getRecommendedJobs = async (req, res) => {
   try {
-    const user = await User.findById(req.user.userId);
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Not authenticated' });
+    }
+    
+    const user = await User.findById(userId);
     if (!user || !Array.isArray(user.skills) || user.skills.length === 0) {
       // If no skills, return all jobs (limit 20)
       let jobs = await Job.find().sort({ createdAt: -1 }).limit(20);
@@ -483,10 +488,29 @@ export const getRecommendedJobs = async (req, res) => {
       });
       return res.json({ success: true, data: jobs });
     }
-    // Find jobs where any required skill matches user skills
-    let jobs = await Job.find({
-      skills_required: { $in: user.skills }
-    }).sort({ createdAt: -1 }).limit(20);
+    // Find jobs where any required skill matches user skills (case-insensitive)
+    const userSkillsLower = user.skills.map(skill => skill.toLowerCase().trim());
+    
+    let jobs = await Job.find().sort({ createdAt: -1 }).limit(50);
+    
+    // Filter jobs based on skills match
+    jobs = jobs.filter(job => {
+      if (!job.skills_required || !Array.isArray(job.skills_required)) return false;
+      
+      const jobSkillsLower = job.skills_required.map(skill => 
+        typeof skill === 'string' ? skill.toLowerCase().trim() : skill
+      );
+      
+      // Check if any user skill matches any job skill
+      return userSkillsLower.some(userSkill => 
+        jobSkillsLower.some(jobSkill => 
+          jobSkill.includes(userSkill) || userSkill.includes(jobSkill)
+        )
+      );
+    });
+    
+    // Limit to 20 jobs
+    jobs = jobs.slice(0, 20);
     // Final safety filter to ensure no expired jobs are returned
     const now = new Date();
     now.setHours(0, 0, 0, 0);

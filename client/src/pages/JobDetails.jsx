@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import JobCard from '../components/JobCard';
 import toast from 'react-hot-toast';
 import { fetchJob, applyForJob } from '../api/jobs';
+import JobDetailsSkeleton from '../components/loaders/JobDetailsSkeleton';
 import { FaBookmark, FaRegBookmark, FaGlobe, FaLinkedin, FaMoneyBillWave, FaCalendarAlt, FaClock, FaBriefcase, FaTag, FaBolt, FaUser, FaEnvelope, FaUpload, FaPaperPlane, FaPhone } from 'react-icons/fa';
 
 const MAX_DESC_LENGTH = 300;
@@ -69,7 +70,7 @@ const JobDetails = () => {
   }, [id]);
 
   if (!job) {
-    return <div className="flex justify-center items-center h-64">Loading...</div>;
+    return <JobDetailsSkeleton />;
   }
 
   // Helper: get company website or LinkedIn
