@@ -30,14 +30,18 @@ passport.use(new GoogleStrategy({
 }));
 
 passport.serializeUser((user, done) => {
+  console.log('Passport serialize - User ID:', user.id);
   done(null, user.id);
 });
 
 passport.deserializeUser(async (id, done) => {
   try {
+    console.log('Passport deserialize - User ID:', id);
     const user = await User.findById(id);
+    console.log('Passport deserialize - User found:', user ? user.email : 'No user');
     done(null, user);
   } catch (err) {
+    console.log('Passport deserialize - Error:', err);
     done(err, null);
   }
 });
