@@ -58,16 +58,27 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
       return;
     }
-            axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/me`, { withCredentials: true })
-        .then(response => {
-          setUser(response.data.data);
-        })
-        .catch(() => {
-        setUser(null);
-        })
-        .finally(() => {
-          setLoading(false);
+
+    // Check for session-based authentication
+    const checkSession = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/auth/me`, { 
+          withCredentials: true 
         });
+        if (response.data.success) {
+          setUser(response.data.data);
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.log('Session check failed:', error.response?.status);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkSession();
   }, []);
 
   useEffect(() => {

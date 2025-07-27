@@ -18,9 +18,14 @@ router.get('/google', passport.authenticate('google', { scope: ['profile', 'emai
 router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/login', session: true }),
   (req, res) => {
+    console.log('OAuth callback - User:', req.user ? req.user.email : 'No user');
+    console.log('OAuth callback - Session:', req.session ? 'Session exists' : 'No session');
+    
     const redirectUrl = process.env.NODE_ENV === 'production' 
       ? `${process.env.CLIENT_URL}/profile`
       : 'http://localhost:5173/profile';
+    
+    console.log('Redirecting to:', redirectUrl);
     res.redirect(redirectUrl);
   }
 );
